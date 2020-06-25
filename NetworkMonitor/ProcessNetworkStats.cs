@@ -20,7 +20,7 @@ namespace NetworkMonitor
             var secondRead = new PerformanceCounter("Process", "IO Read Bytes/sec", process).RawValue;
             var secondWrite = new PerformanceCounter("Process", "IO Write Bytes/sec", process).RawValue;
 
-            return new string[] { Convert.ToString(secondRead - firstRead), Convert.ToString(secondWrite - firstWrite), process };
+            return new string[] { process, Convert.ToString(secondRead - firstRead), Convert.ToString(secondWrite - firstWrite)};
         }
     }
 }

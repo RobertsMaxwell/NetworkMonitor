@@ -11,12 +11,15 @@ namespace NetworkMonitor
 {
     class Network
     {
-        static List<string> processNames = new List<string>();
-        static List<string[]> netStatsResults = new List<string[]>();
-        static List<Thread> threads = new List<Thread>();
+        static List<string> processNames;
+        static List<string[]> netStatsResults;
+        static List<Thread> threads;
 
         public static string[][] Usage()
         {
+            processNames = new List<string>();
+            netStatsResults = new List<string[]>();
+            threads = new List<Thread>();
             foreach (Process proc in Process.GetProcesses())
             {
                 try
@@ -26,10 +29,7 @@ namespace NetworkMonitor
                         processNames.Add(proc.ProcessName);
                     }
                 }
-                catch (Exception e) 
-                {
-                    Console.WriteLine("!\n" + e.Message + "\n!");
-                }
+                catch (Exception) { }
             }
 
             foreach (string name in processNames)
@@ -60,6 +60,12 @@ namespace NetworkMonitor
             catch (Exception) { }
             
             Thread.CurrentThread.Abort();
+        }
+
+        public static long[] GetTotalNetworkBytes()
+        {
+            IPv4InterfaceStatistics netAdapterStats = NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up).Select(x => x.GetIPv4Statistics()).ToArray()[0];
+            return new long[] { netAdapterStats.BytesReceived , netAdapterStats.BytesSent};
         }
     }
 }
