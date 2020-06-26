@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
 using System.Net.NetworkInformation;
+using System.Collections;
 
 namespace NetworkMonitor
 {
@@ -26,7 +27,6 @@ namespace NetworkMonitor
 
         private void startButton_Click(object sender, EventArgs e)
         {
-            
             if (start)
             {
                 listThread = new Thread(delegate () { PopulateListView();  });
@@ -67,34 +67,75 @@ namespace NetworkMonitor
             }
         }
 
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
         {
+            int columnIndex = e.Column;
 
+            if (listView1.ListViewItemSorter != null && ((ListViewItemCompare)listView1.ListViewItemSorter).col == columnIndex)
+            {
+                switch (listView1.Sorting)
+                {
+                    case SortOrder.Ascending:
+                        listView1.Sorting = SortOrder.Descending;
+                        break;
+                    case SortOrder.Descending:
+                        listView1.Sorting = SortOrder.Ascending;
+                        break;
+                }
+            }
+            else
+            {
+                listView1.Sorting = SortOrder.Ascending;
+            }
+
+            listView1.ListViewItemSorter = new ListViewItemCompare(columnIndex, listView1.Sorting);
+            listView1.Sort();
+        }
+    }
+
+    class ListViewItemCompare : IComparer
+    {
+        public int col;
+        SortOrder order;
+
+        public ListViewItemCompare()
+        {
+            col = 0;
+            order = SortOrder.Ascending;
         }
 
-        private void label1_Click(object sender, EventArgs e)
+        public ListViewItemCompare(int headerIndex, SortOrder sortingOrder)
         {
-
+            col = headerIndex;
+            order = sortingOrder;
         }
 
-        private void downloadDisplay_Click(object sender, EventArgs e)
+        public int Compare(object x, object y)
         {
+            int value1;
+            int value2;
 
-        }
+            if (Int32.TryParse(((ListViewItem)x).SubItems[col].Text, out value1) && Int32.TryParse(((ListViewItem)y).SubItems[col].Text, out value2))
+            {
+                if (order == SortOrder.Ascending)
+                {
+                    return value1.CompareTo(value2);
+                }
+                else
+                {
+                    return value2.CompareTo(value1);
+                }
+            }
 
-        private void uploadDisplay_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void toolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-
+            if (order == SortOrder.Ascending)
+            {
+                return string.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
+            }
+            else
+            {
+                return string.Compare(((ListViewItem)y).SubItems[col].Text, ((ListViewItem)x).SubItems[col].Text);
+            }
+            
         }
     }
 }

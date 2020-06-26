@@ -20,6 +20,7 @@ namespace NetworkMonitor
             processNames = new List<string>();
             netStatsResults = new List<string[]>();
             threads = new List<Thread>();
+            
             foreach (Process proc in Process.GetProcesses())
             {
                 try
@@ -41,10 +42,8 @@ namespace NetworkMonitor
 
             foreach (Thread thread in threads)
             {
-                while (thread.IsAlive)
-                {
-                    Thread.Sleep(100);
-                }
+                while (thread.IsAlive) { }
+                thread.Abort();
             }
 
             return netStatsResults.ToArray();
@@ -58,8 +57,7 @@ namespace NetworkMonitor
                 netStatsResults.Add(result);
             }
             catch (Exception) { }
-            
-            Thread.CurrentThread.Abort();
+
         }
 
         public static long[] GetTotalNetworkBytes()
